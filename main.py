@@ -1,10 +1,11 @@
-# uvicorn main2:app --reload --host=0.0.0.0 --port=8000
+# uvicorn main:app --reload --host=0.0.0.0 --port=8000
 
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import uvicorn
+from typing import List, Optional
 
 
 from enum import Enum
@@ -54,10 +55,22 @@ async def create_user(user: UserIn):
 
 @app.post("/login")
 async def login(request: Request, username: str = Form(...), password: str = Form(...)):
-    print('login', username, password)
-    # return {"username": username, "password":password}
     return templates.TemplateResponse('index.html', context={'request': request, "username": username, "password":password})
 
 
-# if __name__=="__main__":
-#     uvicorn.run(app,host="0.0.0.0",port=8000)
+
+class Item(BaseModel):
+    name: str
+    description: Optional[str] = None
+    price: float
+    tax: Optional[float] = None
+    tags: List[str] = []
+
+
+@app.post("/itemLists/", response_model=Item)
+async def create_item(item: Item):
+    return item
+
+
+if __name__=="__main__":
+    uvicorn.run(app,host="0.0.0.0",port=8000)
